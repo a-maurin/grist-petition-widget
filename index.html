@@ -409,6 +409,7 @@ h1 {
 .btn-secondary:hover {
   background-color: #f1f5f9;
 }
+
   </style>
 </head>
 <body>
@@ -572,7 +573,7 @@ async function submitSignature() {
       }]
     ]);
     closeModal();
-    await checkSignatureStatus();
+    await init();
   } catch (err) {
     console.error("Erreur signature:", err);
     errDiv.innerText = "Impossible d'enregistrer la signature. Vous avez peut-être déjà signé cette pétition.";
@@ -583,23 +584,52 @@ async function submitSignature() {
   }
 }
 
+async function loadPetitionData() {
+  try {
+    const tableData = await grist.docApi.fetchTable('Texte_Petition');
+    const ids = tableData.id || [];
+    if (ids.length > 0) {
+      const idx = 0;
+      const titre = tableData.Titre ? tableData.Titre[idx] : "";
+      const argumentaire = tableData.Argumentaire ? tableData.Argumentaire[idx] : "";
+      const count = tableData.Nombre_Signatures ? tableData.Nombre_Signatures[idx] : 0;
+      if (titre) document.getElementById("petition-titre").innerText = titre;
+      if (argumentaire) document.getElementById("petition-argumentaire").innerText = argumentaire;
+      updateProgress(count);
+    }
+  } catch (err) {
+    console.error("Erreur chargement texte:", err);
+  }
+}
+
 async function checkSignatureStatus() {
   try {
     const sigTable = await grist.docApi.fetchTable('Signatures');
     const ids = sigTable.id || [];
-    if (ids.length > 0) {
-      const idx = 0;
-      mySignature = {
-        id: ids[idx],
-        date: sigTable.date_signature ? sigTable.date_signature[idx] : null,
-        commentaire: sigTable.commentaire ? sigTable.commentaire[idx] : ""
-      };
+    const validSignatures = [];
+    for (let i = 0; i < ids.length; i++) {
+      const isEngaged = sigTable.engagement ? (sigTable.engagement[i] === true || sigTable.engagement[i] === 1) : false;
+      if (isEngaged) {
+        validSignatures.push({
+          id: ids[i],
+          date: sigTable.date_signature ? sigTable.date_signature[i] : null,
+          commentaire: sigTable.commentaire ? sigTable.commentaire[i] : "",
+          nom: sigTable.nom_signataire ? sigTable.nom_signataire[i] : "",
+          courriel: sigTable.courriel_signataire ? sigTable.courriel_signataire[i] : ""
+        });
+      }
+    }
+
+    if (validSignatures.length > 0) {
+      mySignature = validSignatures[validSignatures.length - 1];
       displaySignedState();
     } else {
+      mySignature = null;
       displayUnsignedState();
     }
   } catch (err) {
     console.warn("Vérification statut:", err);
+    displayUnsignedState();
   }
 }
 
@@ -638,20 +668,18 @@ function displayUnsignedState() {
 
 grist.ready({ requiredAccess: 'full' });
 
-grist.onRecord(function(record) {
-  if (record) {
-    if (record.Titre) {
-      document.getElementById("petition-titre").innerText = record.Titre;
-    }
-    if (record.Argumentaire) {
-      document.getElementById("petition-argumentaire").innerText = record.Argumentaire;
-    }
-    if (typeof record.Nombre_Signatures === "number") {
-      updateProgress(record.Nombre_Signatures);
-    }
-  }
+async function init() {
+  await loadPetitionData();
+  await checkSignatureStatus();
+}
+
+init();
+
+grist.onRecords(function() {
+  loadPetitionData();
   checkSignatureStatus();
 });
+
 </script>
 </body>
 </html>
