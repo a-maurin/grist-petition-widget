@@ -509,9 +509,15 @@ body {
   font-style: italic;
   background: #ffffff;
   border-radius: 6px;
-  padding: 6px 10px;
-  border: 1px solid #f1f5f9;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
   margin-top: 4px;
+  line-height: 1.5;
+}
+
+.wall-footer {
+  text-align: center;
+  margin-top: 18px;
 }
 
 .wall-empty {
@@ -832,6 +838,11 @@ body {
     <div id="wall-empty-message" class="wall-empty">
       Aucun participant n a encore rendu son soutien public pour le moment.
     </div>
+    <div id="wall-footer-actions" class="wall-footer hidden">
+      <button class="btn-secondary" onclick="showMoreSupporters()" id="btn-show-more">
+        Voir plus de soutiens
+      </button>
+    </div>
   </div>
 
   <!-- Bas de page et espace organisateur -->
@@ -964,6 +975,8 @@ let mySignature = null;
 let petitionGoal = 100;
 let isCampaignOpen = true;
 let allSignaturesCache = [];
+let fullPublicList = [];
+let displayedSupportersCount = 12;
 
 function formatDateTime(ts) {
   if (!ts) return "";
@@ -1084,6 +1097,13 @@ async function checkSignatureStatus() {
       }
     }
 
+    if (!matchedSig) {
+      if (validSignatures.length === 1) {
+        matchedSig = validSignatures[0];
+        localStorage.setItem("grist_petition_row_id", matchedSig.id);
+      }
+    }
+
     if (matchedSig) {
       mySignature = matchedSig;
       displaySignedState();
@@ -1169,18 +1189,31 @@ function renderSupportersWall(signatures) {
     }
   }
 
+  /* Tri antéchronologique : les signatures les plus récentes en tête */
+  publicList.sort(function(a, b) {
+    const da = a.date ? (typeof a.date === "number" ? a.date : new Date(a.date).getTime() / 1000) : 0;
+    const db = b.date ? (typeof b.date === "number" ? b.date : new Date(b.date).getTime() / 1000) : 0;
+    return db - da;
+  });
+
+  fullPublicList = publicList;
+
   const wallTitle = document.getElementById("wall-title-text");
   wallTitle.innerText = "Mur des soutiens publics (" + publicList.length + ")";
 
   const container = document.getElementById("wall-grid-container");
   const emptyMsg = document.getElementById("wall-empty-message");
+  const footerActions = document.getElementById("wall-footer-actions");
   container.innerHTML = "";
 
   if (publicList.length === 0) {
     emptyMsg.classList.remove("hidden");
+    footerActions.classList.add("hidden");
   } else {
     emptyMsg.classList.add("hidden");
-    for (let j = 0; j < publicList.length; j++) {
+    const countToRender = Math.min(displayedSupportersCount, publicList.length);
+
+    for (let j = 0; j < countToRender; j++) {
       const item = publicList[j];
       const card = document.createElement("div");
       card.className = "supporter-item";
@@ -1218,7 +1251,20 @@ function renderSupportersWall(signatures) {
 
       container.appendChild(card);
     }
+
+    if (publicList.length > countToRender) {
+      footerActions.classList.remove("hidden");
+      const remaining = publicList.length - countToRender;
+      document.getElementById("btn-show-more").innerText = "Voir plus de soutiens (" + remaining + " restants)";
+    } else {
+      footerActions.classList.add("hidden");
+    }
   }
+}
+
+function showMoreSupporters() {
+  displayedSupportersCount += 12;
+  renderSupportersWall(allSignaturesCache);
 }
 
 /* Modale Signature */
@@ -1378,8 +1424,8 @@ function exportRegistryCSV() {
     rows.push(['"' + nom + '"', '"' + courriel + '"', '"' + dateStr + '"', '"' + comm + '"', '"' + vis + '"'].join(";"));
   }
 
-  const csvContent = "﻿" + rows.join("
-");
+  const newline = String.fromCharCode(13, 10);
+  const csvContent = "\uFEFF" + rows.join(newline);
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
