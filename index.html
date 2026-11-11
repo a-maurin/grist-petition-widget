@@ -877,7 +877,7 @@ body.popup-flow .popup-sheet-header {
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
         </svg>
-        Pétition officielle nominative
+        Pétition en soutien à la plateforme de revendications en faveur du quasi-statut.
       </div>
       <div id="campaign-badge" class="status-badge open">
         <span class="pulse-dot"></span>
@@ -908,6 +908,26 @@ body.popup-flow .popup-sheet-header {
 
   <!-- Zone d action -->
   <div class="action-card" id="action-zone">
+
+    <div class="popup-sheet-header">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <span class="tag-official">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          Feuille d'émargement officielle
+        </span>
+        <span class="status-badge open" style="font-size: 0.75rem; padding: 3px 8px;">
+          Mobilisation en cours
+        </span>
+      </div>
+      <h2 id="popup-petition-title" style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-top: 10px; margin-bottom: 4px;">
+        Pétition officielle
+      </h2>
+      <p style="font-size: 0.85rem; color: #64748b;">
+        Votre soutien nominatif est certifié et infalsifiable grâce à votre compte professionnel ProConnect.
+      </p>
+    </div>
 
     <!-- État non connecté : bouton ProConnect -->
     <div id="state-unauth" class="action-row">
@@ -1003,7 +1023,7 @@ body.popup-flow .popup-sheet-header {
   <!-- Mur des soutiens publics -->
   <div class="wall-card">
     <div class="wall-header">
-      <h2 class="wall-title" id="wall-title-text">Mur des soutiens publics (0)</h2>
+      <h2 class="wall-title" id="wall-title-text">Soutiens (0)</h2>
       <p class="wall-subtitle">
         Seuls les collègues ayant consenti à l affichage de leur engagement apparaissent sur cet espace.
       </p>
@@ -1025,7 +1045,7 @@ body.popup-flow .popup-sheet-header {
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2563eb" stroke-width="2" style="flex-shrink:0;">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
       </svg>
-      <span>Protection des données personnelles (RGPD) et souveraineté</span>
+      <span>Protection des données personnelles</span>
     </div>
     <div class="rgpd-body" id="petition-rgpd-text">
       Chargement des mentions d'information...
@@ -1187,7 +1207,7 @@ function broadcastEvent(data) {
 }
 
 function isPopupContext() {
-  return Boolean(localStorage.getItem("grist_popup_active") === "1" && window.self !== window.top);
+  return Boolean(window.self !== window.top);
 }
 
 /* Gestion de l'affichage du bandeau toast */
@@ -1424,27 +1444,50 @@ async function detectUserSession() {
     const stored = sessionStorage.getItem("grist_proconnect_user");
     if (stored) {
       currentUser = JSON.parse(stored);
-      if (currentUser && currentUser.email) return currentUser;
-    }
-  } catch (e) {}
-
-  try {
-    const url = isGristEnvironment ? "/api/session/access/active" : `${GRIST_BASE_URL}/api/session/access/active`;
-    const resp = await fetch(url, { credentials: "same-origin" });
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data.user && !data.user.anonymous && data.user.email && data.user.email !== "anon@getgrist.com") {
-        currentUser = {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          isOwner: (data.user.email === "aguirre.maurin@ofb.gouv.fr" || data.user.id === 8755)
-        };
-        try { sessionStorage.setItem("grist_proconnect_user", JSON.stringify(currentUser)); } catch (e) {}
-        return currentUser;
+      if (currentUser) {
+        if (currentUser.email) return currentUser;
       }
     }
   } catch (e) {}
+
+  if (isGristEnvironment) {
+    if (window.grist) {
+      if (grist.docApi) {
+        try {
+          const tokenInfo = await grist.docApi.getAccessToken({});
+          if (tokenInfo) {
+            if (tokenInfo.token) {
+              const bUrl = tokenInfo.baseUrl || GRIST_BASE_URL;
+              const resp = await fetch(bUrl + "/api/session/access/active", {
+                headers: { "Authorization": "Bearer " + tokenInfo.token }
+              });
+              if (resp.ok) {
+                const data = await resp.json();
+                if (data.user) {
+                  if (!data.user.anonymous) {
+                    if (data.user.email) {
+                      if (data.user.email !== "anon@getgrist.com") {
+                        currentUser = {
+                          id: data.user.id,
+                          name: data.user.name,
+                          email: data.user.email,
+                          isOwner: Boolean(data.user.email === "aguirre.maurin@ofb.gouv.fr" || data.user.id === 8755)
+                        };
+                        try { sessionStorage.setItem("grist_proconnect_user", JSON.stringify(currentUser)); } catch (e) {}
+                        return currentUser;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (errToken) {
+          console.warn("Erreur getAccessToken:", errToken);
+        }
+      }
+    }
+  }
 
   return null;
 }
@@ -1519,20 +1562,48 @@ async function checkSignatureStatus() {
 
     /* Détection stricte de la signature de l'agent connecté */
     let matchedSig = null;
-    if (currentUser && currentUser.email) {
-      for (const sig of validSignatures) {
-        if (sig.courriel && sig.courriel.toLowerCase() === currentUser.email.toLowerCase()) {
-          matchedSig = sig;
-          break;
+    if (currentUser) {
+      if (currentUser.email) {
+        for (const sig of validSignatures) {
+          if (sig.courriel) {
+            if (sig.courriel.toLowerCase() === currentUser.email.toLowerCase()) {
+              matchedSig = sig;
+              break;
+            }
+          }
         }
       }
     }
 
-    if (!matchedSig && !isGristEnvironment) {
-      try {
-        const cachedSig = sessionStorage.getItem("grist_my_signature");
-        if (cachedSig) matchedSig = JSON.parse(cachedSig);
-      } catch (e) {}
+    /* En environnement Grist : reconnaissance de sa propre signature protégée par les ACL */
+    if (!matchedSig) {
+      if (isGristEnvironment) {
+        for (const sig of validSignatures) {
+          if (sig.courriel) {
+            if (sig.courriel.indexOf("@") !== -1) {
+              matchedSig = sig;
+              if (!currentUser) {
+                currentUser = {
+                  id: sig.id,
+                  name: sig.nom || "Agent connecté",
+                  email: sig.courriel,
+                  isOwner: Boolean(sig.courriel === "aguirre.maurin@ofb.gouv.fr")
+                };
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!matchedSig) {
+      if (!isGristEnvironment) {
+        try {
+          const cachedSig = sessionStorage.getItem("grist_my_signature");
+          if (cachedSig) matchedSig = JSON.parse(cachedSig);
+        } catch (e) {}
+      }
     }
 
     if (matchedSig) {
@@ -1558,9 +1629,13 @@ async function checkSignatureStatus() {
 
     renderSupportersWall(validSignatures);
 
-    /* En mode popup épurée : si l'agent est connecté et non signé, ouvrir directement la modale de signature */
-    if (isPopupContext() && currentUser && !mySignature && isCampaignOpen) {
-      openSignModal();
+    /* En mode popup épurée : si l'agent n'a pas encore signé, ouvrir directement la feuille de signature */
+    if (isPopupContext()) {
+      if (!mySignature) {
+        if (isCampaignOpen) {
+          openSignModal();
+        }
+      }
     }
 
   } catch (err) {
@@ -1590,8 +1665,15 @@ function displayUnsignedState() {
   if (isCampaignOpen) {
     document.getElementById("state-unsigned-open").classList.remove("hidden");
     document.getElementById("state-unsigned-closed").classList.add("hidden");
-    if (currentUser && currentUser.name) {
-      document.getElementById("user-connected-badge").innerHTML = "Connecté en tant que <strong>" + currentUser.name + "</strong> (" + (currentUser.email || "") + "). Votre soutien sera certifié et strictement unique.";
+    const badgeEl = document.getElementById("user-connected-badge");
+    if (currentUser) {
+      if (currentUser.name) {
+        badgeEl.innerHTML = "Connecté en tant que <strong>" + currentUser.name + "</strong> (" + (currentUser.email || "") + "). Votre émargement sera nominatif et certifié.";
+      } else {
+        badgeEl.innerHTML = "Votre session est certifiée par ProConnect. Votre émargement sera nominatif et strictement unique.";
+      }
+    } else {
+      badgeEl.innerHTML = "Votre session est certifiée par ProConnect. Votre émargement sera nominatif et strictement unique.";
     }
   } else {
     document.getElementById("state-unsigned-open").classList.add("hidden");
@@ -1645,20 +1727,28 @@ function displaySignedState() {
 }
 
 function handleProConnectAuth() {
-  localStorage.setItem("grist_popup_active", "1");
   const nextTarget = "/o/docs/" + GRIST_DOC_ID + "/p/1?style=singlePage";
   const signinUrl = `${GRIST_BASE_URL}/signin?next=` + encodeURIComponent(nextTarget);
+
+  if (isPopupContext()) {
+    if (window.top) {
+      window.top.location.href = signinUrl;
+    } else {
+      window.location.href = signinUrl;
+    }
+    return;
+  }
+
   const w = 620;
-  const h = 700;
+  const h = 720;
   const left = Math.max(0, (window.screen.width - w) / 2);
   const top = Math.max(0, (window.screen.height - h) / 2);
-  authPopupRef = window.open(signinUrl, "proconnect_flow", `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+  authPopupRef = window.open(signinUrl, "proconnect_flow", "width=" + w + ",height=" + h + ",top=" + top + ",left=" + left + ",scrollbars=yes,resizable=yes");
 
   if (authPopupRef) {
     const pollTimer = setInterval(function() {
       if (!authPopupRef || authPopupRef.closed) {
         clearInterval(pollTimer);
-        localStorage.removeItem("grist_popup_active");
         init();
       }
     }, 700);
@@ -1682,7 +1772,7 @@ function renderSupportersWall(signatures) {
   fullPublicList = publicList;
 
   const wallTitle = document.getElementById("wall-title-text");
-  wallTitle.innerText = "Mur des soutiens publics (" + publicList.length + ")";
+  wallTitle.innerText = "Soutiens (" + publicList.length + ")";
 
   const container = document.getElementById("wall-grid-container");
   const emptyMsg = document.getElementById("wall-empty-message");
@@ -1825,12 +1915,15 @@ async function submitSignature() {
         </div>
       `;
       setTimeout(function() {
-        localStorage.removeItem("grist_popup_active");
-        if (window.top && window.top !== window && window.top.close) {
-          try { window.top.close(); } catch (e) {}
+        if (window.top) {
+          if (window.top !== window) {
+            if (window.top.close) {
+              try { window.top.close(); } catch (e) {}
+            }
+          }
         }
         window.close();
-      }, 700);
+      }, 1200);
       return;
     }
 
@@ -1917,12 +2010,15 @@ async function submitEditSignature() {
         </div>
       `;
       setTimeout(function() {
-        localStorage.removeItem("grist_popup_active");
-        if (window.top && window.top !== window && window.top.close) {
-          try { window.top.close(); } catch (e) {}
+        if (window.top) {
+          if (window.top !== window) {
+            if (window.top.close) {
+              try { window.top.close(); } catch (e) {}
+            }
+          }
         }
         window.close();
-      }, 700);
+      }, 1200);
       return;
     }
 
@@ -1999,12 +2095,15 @@ async function confirmRetractSignature() {
         </div>
       `;
       setTimeout(function() {
-        localStorage.removeItem("grist_popup_active");
-        if (window.top && window.top !== window && window.top.close) {
-          try { window.top.close(); } catch (e) {}
+        if (window.top) {
+          if (window.top !== window) {
+            if (window.top.close) {
+              try { window.top.close(); } catch (e) {}
+            }
+          }
         }
         window.close();
-      }, 700);
+      }, 1200);
       return;
     }
 
