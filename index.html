@@ -1308,67 +1308,111 @@ async function loadPetitionData() {
     let argumentaire = "";
     let count = 0;
     let rgpd = "";
+    let fetchSuccess = false;
 
-    if (isGristEnvironment && window.grist && grist.docApi) {
-      const tableData = await grist.docApi.fetchTable("Texte_Petition");
-      const ids = tableData.id || [];
-      if (ids.length > 0) {
-        const idx = 0;
-        titre = tableData.Titre ? tableData.Titre[idx] : "";
-        argumentaire = tableData.Argumentaire ? tableData.Argumentaire[idx] : "";
-        count = tableData.Nombre_Signatures ? tableData.Nombre_Signatures[idx] : 0;
-        if (tableData.Objectif_Signatures && tableData.Objectif_Signatures[idx]) {
-          petitionGoal = tableData.Objectif_Signatures[idx];
-        }
-        if (tableData.Campagne_Ouverte !== undefined) {
-          isCampaignOpen = (tableData.Campagne_Ouverte[idx] === true || tableData.Campagne_Ouverte[idx] === 1);
-        }
-        if (tableData.Mentions_RGPD && tableData.Mentions_RGPD[idx]) {
-          rgpd = tableData.Mentions_RGPD[idx];
+    if (isGristEnvironment) {
+      if (window.grist) {
+        if (grist.docApi) {
+          try {
+            const fetchPromise = grist.docApi.fetchTable("Texte_Petition");
+            const timeoutPromise = new Promise(function(_, reject) {
+              setTimeout(function() { reject(new Error("Timeout liaison interne")); }, 2500);
+            });
+            const tableData = await Promise.race([fetchPromise, timeoutPromise]);
+            const ids = tableData.id || [];
+            if (ids.length > 0) {
+              const idx = 0;
+              titre = tableData.Titre ? tableData.Titre[idx] : "";
+              argumentaire = tableData.Argumentaire ? tableData.Argumentaire[idx] : "";
+              count = tableData.Nombre_Signatures ? tableData.Nombre_Signatures[idx] : 0;
+              if (tableData.Objectif_Signatures) {
+                if (tableData.Objectif_Signatures[idx]) {
+                  petitionGoal = tableData.Objectif_Signatures[idx];
+                }
+              }
+              if (tableData.Campagne_Ouverte !== undefined) {
+                isCampaignOpen = Boolean(tableData.Campagne_Ouverte[idx] === true || tableData.Campagne_Ouverte[idx] === 1);
+              }
+              if (tableData.Mentions_RGPD) {
+                if (tableData.Mentions_RGPD[idx]) {
+                  rgpd = tableData.Mentions_RGPD[idx];
+                }
+              }
+              fetchSuccess = true;
+            }
+          } catch (errGrist) {
+            console.warn("Repli texte vers passerelle web:", errGrist);
+          }
         }
       }
-    } else {
+    }
+
+    if (!fetchSuccess) {
       const url = `${GRIST_BASE_URL}/api/docs/${GRIST_DOC_ID}/tables/Texte_Petition/records`;
       const resp = await fetch(url);
       if (resp.ok) {
         const json = await resp.json();
-        if (json.records && json.records.length > 0) {
-          const rec = json.records[0].fields;
-          titre = rec.Titre || "";
-          argumentaire = rec.Argumentaire || "";
-          count = rec.Nombre_Signatures || 0;
-          if (rec.Objectif_Signatures) petitionGoal = rec.Objectif_Signatures;
-          if (rec.Campagne_Ouverte !== undefined) isCampaignOpen = Boolean(rec.Campagne_Ouverte);
-          if (rec.Mentions_RGPD) rgpd = rec.Mentions_RGPD;
+        if (json.records) {
+          if (json.records.length > 0) {
+            const rec = json.records[0].fields;
+            titre = rec.Titre || "";
+            argumentaire = rec.Argumentaire || "";
+            count = rec.Nombre_Signatures || 0;
+            if (rec.Objectif_Signatures) petitionGoal = rec.Objectif_Signatures;
+            if (rec.Campagne_Ouverte !== undefined) isCampaignOpen = Boolean(rec.Campagne_Ouverte);
+            if (rec.Mentions_RGPD) rgpd = rec.Mentions_RGPD;
+            fetchSuccess = true;
+          }
         }
       }
     }
 
-    if (titre) {
-      document.getElementById("petition-titre").innerText = titre;
-      const popupTitleEl = document.getElementById("popup-petition-title");
-      if (popupTitleEl) popupTitleEl.innerText = titre;
-    }
-    if (argumentaire) document.getElementById("petition-argumentaire").innerHTML = renderMarkdown(argumentaire);
-    if (rgpd) {
-      document.getElementById("petition-rgpd-text").innerHTML = renderMarkdown(rgpd);
-    } else {
-      document.getElementById("petition-rgpd-text").innerText = "Les informations recueillies font l'objet d'un traitement placé sous la responsabilité des initiateurs de la démarche aux fins exclusives de recueil des soutiens. Données hébergées sur l'infrastructure souveraine DINUM.";
-    }
+    if (fetchSuccess) {
+      if (titre) {
+        document.getElementById("petition-titre").innerText = titre;
+        const popupTitleEl = document.getElementById("popup-petition-title");
+        if (popupTitleEl) popupTitleEl.innerText = titre;
+      }
+      if (argumentaire) document.getElementById("petition-argumentaire").innerHTML = renderMarkdown(argumentaire);
+      if (rgpd) {
+        document.getElementById("petition-rgpd-text").innerHTML = renderMarkdown(rgpd);
+      } else {
+        document.getElementById("petition-rgpd-text").innerText = "Les informations recueillies font l'objet d'un traitement placé sous la responsabilité des initiateurs de la démarche aux fins exclusives de recueil des soutiens. Données hébergées sur l'infrastructure souveraine DINUM.";
+      }
 
-    const badge = document.getElementById("campaign-badge");
-    const statusText = document.getElementById("campaign-status-text");
-    if (isCampaignOpen) {
-      badge.className = "status-badge open";
-      statusText.innerText = "Mobilisation en cours";
-    } else {
-      badge.className = "status-badge closed";
-      statusText.innerText = "Campagne close";
-    }
+      const badge = document.getElementById("campaign-badge");
+      const statusText = document.getElementById("campaign-status-text");
+      if (isCampaignOpen) {
+        badge.className = "status-badge open";
+        statusText.innerText = "Mobilisation en cours";
+      } else {
+        badge.className = "status-badge closed";
+        statusText.innerText = "Campagne close";
+      }
 
-    updateProgress(count);
+      updateProgress(count);
+    } else {
+      displayLoadError();
+    }
   } catch (err) {
     console.error("Erreur chargement texte pétition:", err);
+    displayLoadError();
+  }
+}
+
+function displayLoadError() {
+  const currentTitle = document.getElementById("petition-titre").innerText;
+  if (currentTitle.indexOf("en cours de chargement") !== -1 || currentTitle.indexOf("indisponible") !== -1) {
+    document.getElementById("petition-titre").innerText = "Liaison temporairement indisponible";
+    document.getElementById("petition-argumentaire").innerHTML =
+      '<div style="text-align: center; padding: 24px 16px;">' +
+      '<p style="margin-bottom: 16px; color: #64748b; font-size: 15px;">' +
+      'Impossible de joindre la base de données Grist pour charger le texte et les compteurs de la pétition.' +
+      '</p>' +
+      '<button onclick="init()" class="btn-primary" style="display: inline-flex; width: auto; margin: 0 auto; padding: 10px 22px; font-size: 14px;">' +
+      'Réessayer' +
+      '</button>' +
+      '</div>';
   }
 }
 
@@ -1416,24 +1460,40 @@ async function checkSignatureStatus() {
 
     let validSignatures = [];
 
-    if (isGristEnvironment && window.grist && grist.docApi) {
-      const sigTable = await grist.docApi.fetchTable("Signatures");
-      const ids = sigTable.id || [];
-      for (let i = 0; i < ids.length; i++) {
-        const isEngaged = sigTable.engagement ? (sigTable.engagement[i] === true || sigTable.engagement[i] === 1) : false;
-        if (isEngaged) {
-          const isPub = sigTable.rendre_public ? (sigTable.rendre_public[i] === true || sigTable.rendre_public[i] === 1) : false;
-          validSignatures.push({
-            id: ids[i],
-            date: sigTable.date_signature ? sigTable.date_signature[i] : null,
-            commentaire: sigTable.commentaire ? sigTable.commentaire[i] : "",
-            nom: sigTable.nom_signataire ? sigTable.nom_signataire[i] : "",
-            courriel: sigTable.courriel_signataire ? sigTable.courriel_signataire[i] : "",
-            rendre_public: isPub
-          });
+    let signaturesLoaded = false;
+    if (isGristEnvironment) {
+      if (window.grist) {
+        if (grist.docApi) {
+          try {
+            const fetchSigPromise = grist.docApi.fetchTable("Signatures");
+            const timeoutSigPromise = new Promise(function(_, reject) {
+              setTimeout(function() { reject(new Error("Timeout signatures interne")); }, 2500);
+            });
+            const sigTable = await Promise.race([fetchSigPromise, timeoutSigPromise]);
+            const ids = sigTable.id || [];
+            for (let i = 0; i < ids.length; i++) {
+              const isEngaged = sigTable.engagement ? (sigTable.engagement[i] === true || sigTable.engagement[i] === 1) : false;
+              if (isEngaged) {
+                const isPub = sigTable.rendre_public ? (sigTable.rendre_public[i] === true || sigTable.rendre_public[i] === 1) : false;
+                validSignatures.push({
+                  id: ids[i],
+                  date: sigTable.date_signature ? sigTable.date_signature[i] : null,
+                  commentaire: sigTable.commentaire ? sigTable.commentaire[i] : "",
+                  nom: sigTable.nom_signataire ? sigTable.nom_signataire[i] : "",
+                  courriel: sigTable.courriel_signataire ? sigTable.courriel_signataire[i] : "",
+                  rendre_public: isPub
+                });
+              }
+            }
+            signaturesLoaded = true;
+          } catch (errSig) {
+            console.warn("Repli signatures vers passerelle web:", errSig);
+          }
         }
       }
-    } else {
+    }
+
+    if (!signaturesLoaded) {
       const url = `${GRIST_BASE_URL}/api/docs/${GRIST_DOC_ID}/tables/Signatures/records`;
       const resp = await fetch(url);
       if (resp.ok) {
@@ -2058,18 +2118,32 @@ async function init() {
 }
 
 try {
-  if (window.grist) {
-    grist.ready({ requiredAccess: "full" });
-    isGristEnvironment = true;
-    grist.onRecords(function() {
-      init();
-    });
+  const isInIframe = Boolean(window.self !== window.top);
+  if (isInIframe) {
+    if (window.grist) {
+      grist.ready({ requiredAccess: "full" });
+      isGristEnvironment = true;
+      grist.onRecords(function() {
+        init();
+      });
+    } else {
+      isGristEnvironment = false;
+    }
+  } else {
+    isGristEnvironment = false;
   }
 } catch (e) {
   isGristEnvironment = false;
 }
 
 init();
+
+/* Actualisation périodique discrète toutes les 60 secondes en mode autonome */
+if (!isGristEnvironment) {
+  setInterval(function() {
+    init();
+  }, 60000);
+}
 </script>
 </body>
 </html>
