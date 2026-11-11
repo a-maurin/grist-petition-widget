@@ -23,277 +23,552 @@ body {
 .petition-container {
   max-width: 820px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
-.header-card {
+/* En-tête */
+.petition-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 32px 36px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 32px 28px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
 }
 
-.badge-tag {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #1e40af;
-  background-color: #dbeafe;
-  padding: 4px 10px;
-  border-radius: 6px;
+.petition-badge-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 14px;
 }
 
-h1 {
-  font-size: 26px;
+.tag-official {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid #bfdbfe;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.status-badge.open {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.status-badge.closed {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-badge.open .pulse-dot {
+  background-color: #16a34a;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: pulse-green 1.8s infinite;
+}
+
+.status-badge.closed .pulse-dot {
+  background-color: #dc2626;
+}
+
+@keyframes pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(22, 163, 74, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+  }
+}
+
+.petition-title {
+  font-size: 1.7rem;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.3;
   margin-bottom: 20px;
 }
 
-.petition-text {
-  font-size: 15px;
+.petition-body {
+  font-size: 1rem;
   color: #334155;
   white-space: pre-wrap;
+  background: #f8fafc;
+  border-left: 4px solid #2563eb;
+  padding: 18px 20px;
+  border-radius: 6px;
   line-height: 1.7;
 }
 
-.stats-card {
+/* Carte statistiques et objectif */
+.stat-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 24px 36px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
   flex-wrap: wrap;
+  gap: 20px;
 }
 
-.stat-main {
+.stat-metric {
   display: flex;
   align-items: baseline;
   gap: 12px;
 }
 
 .stat-number {
-  font-size: 44px;
+  font-size: 2.8rem;
   font-weight: 900;
   color: #2563eb;
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 16px;
+  font-size: 1rem;
+  color: #64748b;
   font-weight: 600;
-  color: #475569;
 }
 
 .stat-dynamism {
   flex: 1;
-  min-width: 200px;
-  max-width: 340px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  min-width: 240px;
 }
 
-.pulse-indicator {
+.progress-header {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  color: #475569;
   font-weight: 600;
-  color: #059669;
-}
-
-.pulse-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #10b981;
-  border-radius: 50%;
-  box-shadow: 0 0 0 rgba(16, 185, 129, 0.6);
-  animation: pulse-ring 2s infinite;
-}
-
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  margin-bottom: 8px;
 }
 
 .progress-bar-bg {
   width: 100%;
-  height: 8px;
-  background-color: #e2e8f0;
+  height: 12px;
+  background: #e2e8f0;
   border-radius: 999px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #10b981);
-  width: 30%;
+  background: linear-gradient(90deg, #2563eb, #16a34a);
   border-radius: 999px;
-  transition: width 0.6s ease;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0%;
 }
 
+/* Zone d action */
 .action-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 28px 36px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
 }
 
-.state-block {
+.action-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
   flex-wrap: wrap;
+  gap: 16px;
 }
 
 .action-info h3 {
-  font-size: 18px;
+  font-size: 1.15rem;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .action-info p {
-  font-size: 14px;
+  font-size: 0.92rem;
   color: #64748b;
 }
 
+/* Boutons */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   background-color: #16a34a;
   color: #ffffff;
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 700;
-  padding: 12px 24px;
+  padding: 13px 26px;
+  border-radius: 10px;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
   background-color: #15803d;
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.35);
+  transform: translateY(-1px);
 }
 
-.btn-primary:active {
-  transform: scale(0.98);
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f1f5f9;
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.btn-primary:disabled {
-  background-color: #94a3b8;
-  cursor: not-allowed;
-  box-shadow: none;
+.btn-secondary:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
 }
 
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: #2563eb;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-outline:hover {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.btn-danger-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: #dc2626;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-danger-outline:hover {
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #dc2626;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+/* État signé */
 .badge-confirmed {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  padding: 22px 24px;
   display: flex;
+  gap: 18px;
   align-items: flex-start;
-  gap: 16px;
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 10px;
-  padding: 20px 24px;
-  width: 100%;
+  margin-bottom: 18px;
 }
 
 .icon-success {
   flex-shrink: 0;
-  margin-top: 2px;
+  background: #dcfce7;
+  padding: 10px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .confirmed-text h3 {
-  font-size: 18px;
+  color: #15803d;
+  font-size: 1.22rem;
   font-weight: 800;
-  color: #166534;
   margin-bottom: 4px;
 }
 
-.confirmed-text p {
-  font-size: 14px;
+.signatory-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.confirmed-meta {
+  color: #166534;
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+}
+
+.visibility-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+.visibility-tag.public {
+  background: #dcfce7;
   color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.visibility-tag.private {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
 }
 
 .comment-box {
-  margin-top: 10px;
-  background-color: #ffffff;
-  border: 1px solid #dcfce7;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #1e293b;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-left: 3px solid #16a34a;
+  border-radius: 4px;
+  font-size: 0.92rem;
 }
 
 .comment-label {
   font-weight: 600;
-  color: #166534;
+  color: #334155;
   margin-right: 6px;
 }
 
 .comment-content {
+  color: #475569;
   font-style: italic;
 }
 
-.locked-note {
+.signed-actions-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Mur des soutiens */
+.wall-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.wall-header {
+  margin-bottom: 20px;
+}
+
+.wall-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.wall-subtitle {
+  font-size: 0.88rem;
   color: #64748b;
-  width: 100%;
-  margin-top: 8px;
 }
 
-.hidden {
-  display: none !important;
+.wall-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
 }
 
-/* Fenêtre modale */
+.supporter-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.supporter-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.supporter-info {
+  overflow: hidden;
+}
+
+.supporter-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.supporter-date {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.supporter-comment {
+  font-size: 0.85rem;
+  color: #475569;
+  font-style: italic;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  border: 1px solid #f1f5f9;
+  margin-top: 4px;
+}
+
+.wall-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+/* Bas de page et espace organisateur */
+.admin-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 8px;
+  font-size: 0.84rem;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Modales */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(2px);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
   padding: 16px;
+  z-index: 1000;
 }
 
 .modal-dialog {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 16px;
   max-width: 520px;
   width: 100%;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  animation: modal-enter 0.2s ease-out;
+  animation: modal-appear 0.2s ease-out;
 }
 
-@keyframes modal-enter {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-header {
@@ -305,59 +580,64 @@ h1 {
 }
 
 .modal-header h2 {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #0f172a;
 }
 
 .modal-close {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 1.3rem;
   color: #94a3b8;
   cursor: pointer;
-  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
 .modal-close:hover {
-  color: #475569;
+  color: #0f172a;
+  background: #f1f5f9;
 }
 
 .modal-body {
   padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
 .modal-notice {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
   display: flex;
   gap: 12px;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
-  padding: 14px 16px;
-  border-radius: 8px;
-  font-size: 13px;
+  font-size: 0.88rem;
   color: #1e40af;
-  line-height: 1.5;
 }
 
-.modal-notice strong {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 2px;
+.modal-warning {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  display: flex;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: #991b1b;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
-  font-size: 13px;
+  display: block;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #334155;
+  margin-bottom: 6px;
 }
 
 .form-group textarea {
@@ -365,73 +645,101 @@ h1 {
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 14px;
   font-family: inherit;
+  font-size: 0.92rem;
   resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
 }
 
 .form-group textarea:focus {
-  outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.checkbox-control {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.checkbox-control input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #16a34a;
+}
+
+.checkbox-text {
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
 .modal-error {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
+  background: #fef2f2;
   color: #b91c1c;
   padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  font-size: 0.86rem;
+  margin-top: 12px;
 }
 
 .modal-footer {
   padding: 16px 24px;
-  background-color: #f8fafc;
   border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
 }
 
-.btn-secondary {
-  background-color: #ffffff;
-  color: #475569;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 10px 18px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  cursor: pointer;
+.hidden {
+  display: none !important;
 }
-
-.btn-secondary:hover {
-  background-color: #f1f5f9;
-}
-
   </style>
 </head>
 <body>
+
 <div class="petition-container">
-  <!-- En-tête avec titre et motifs -->
-  <div class="header-card">
-    <div class="badge-tag">Pétition officielle nominative</div>
-    <h1 id="petition-titre">Pétition pour l'amélioration des conditions d'exercice</h1>
-    <div class="petition-text" id="petition-argumentaire">
-      Chargement du texte de la pétition...
+
+  <!-- En-tête de la pétition -->
+  <div class="petition-card">
+    <div class="petition-badge-line">
+      <div class="tag-official">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+        </svg>
+        Pétition officielle nominative
+      </div>
+      <div id="campaign-badge" class="status-badge open">
+        <span class="pulse-dot"></span>
+        <span id="campaign-status-text">Mobilisation en cours</span>
+      </div>
     </div>
+
+    <h1 class="petition-title" id="petition-titre">Pétition en cours de chargement...</h1>
+    <div class="petition-body" id="petition-argumentaire">Chargement du texte de la pétition...</div>
   </div>
 
-  <!-- Bloc statistique et compteur -->
-  <div class="stats-card">
-    <div class="stat-main">
+  <!-- Statistiques et barre d avancement -->
+  <div class="stat-card">
+    <div class="stat-metric">
       <div class="stat-number" id="count-number">0</div>
       <div class="stat-label">soutiens recueillis</div>
     </div>
     <div class="stat-dynamism">
-      <div class="pulse-indicator">
-        <span class="pulse-dot"></span> Mobilisation en cours
+      <div class="progress-header">
+        <span id="progress-goal-text">Objectif : 100 soutiens</span>
+        <span id="progress-percent-text">0 % atteint</span>
       </div>
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="progress-fill"></div>
@@ -439,16 +747,17 @@ h1 {
     </div>
   </div>
 
-  <!-- Zone d'action de signature -->
+  <!-- Zone d action -->
   <div class="action-card" id="action-zone">
-    <!-- État non signé : bouton d'engagement -->
-    <div id="state-unsigned" class="state-block">
+
+    <!-- État non signé : campagne ouverte -->
+    <div id="state-unsigned-open" class="action-row">
       <div class="action-info">
         <h3>Apportez votre soutien à cette démarche</h3>
         <p>Votre émargement sera nominatif, certifié par votre compte connecté et strictement unique.</p>
       </div>
-      <button id="btn-open-modal" class="btn-primary" onclick="openModal()">
-        <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+      <button id="btn-open-modal" class="btn-primary" onclick="openSignModal()">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 20h9"></path>
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
         </svg>
@@ -456,65 +765,195 @@ h1 {
       </button>
     </div>
 
-    <!-- État signé : badge vert nominatif -->
-    <div id="state-signed" class="state-block hidden">
+    <!-- État non signé : campagne close -->
+    <div id="state-unsigned-closed" class="action-info hidden">
+      <h3>Campagne de signature clôturée</h3>
+      <p>Le recueil des soutiens est désormais clos pour cette pétition. Merci à l ensemble des participants pour leur mobilisation.</p>
+    </div>
+
+    <!-- État signé -->
+    <div id="state-signed" class="hidden">
       <div class="badge-confirmed">
         <div class="icon-success">
-          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#16a34a" stroke-width="2.5">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#16a34a" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
-        <div class="confirmed-text">
+        <div class="confirmed-text" style="flex: 1;">
           <h3>Votre soutien a bien été enregistré</h3>
-          <p id="signed-meta">Enregistré le ...</p>
+          <div class="signatory-name" id="signed-signatory-name"></div>
+          <p class="confirmed-meta" id="signed-meta">Enregistré le ...</p>
+          <div>
+            <span id="signed-visibility-badge" class="visibility-tag private">
+              Visibilité confidentielle
+            </span>
+          </div>
           <div id="signed-comment-box" class="comment-box hidden">
             <span class="comment-label">Votre observation :</span>
             <span id="signed-comment-text" class="comment-content"></span>
           </div>
         </div>
       </div>
-      <div class="locked-note">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        Signature certifiée et définitive. Vous ne pouvez pas signer une deuxième fois.
+
+      <div class="signed-actions-bar">
+        <span style="font-size: 0.86rem; color: #64748b;">
+          Vous conservez la maîtrise complète de votre engagement.
+        </span>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn-outline" onclick="openEditModal()">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Modifier mon observation
+          </button>
+          <button class="btn-danger-outline" onclick="openRetractModal()">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Retirer mon soutien
+          </button>
+        </div>
       </div>
     </div>
+
   </div>
+
+  <!-- Mur des soutiens publics -->
+  <div class="wall-card">
+    <div class="wall-header">
+      <h2 class="wall-title" id="wall-title-text">Mur des soutiens publics (0)</h2>
+      <p class="wall-subtitle">
+        Seuls les collègues ayant consenti à l affichage de leur engagement apparaissent sur cet espace.
+      </p>
+    </div>
+    <div id="wall-grid-container" class="wall-grid"></div>
+    <div id="wall-empty-message" class="wall-empty">
+      Aucun participant n a encore rendu son soutien public pour le moment.
+    </div>
+  </div>
+
+  <!-- Bas de page et espace organisateur -->
+  <div class="admin-footer">
+    <span>Registre officiel nominatif et infalsifiable</span>
+    <button class="btn-secondary" onclick="exportRegistryCSV()" id="btn-export-csv">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      Exporter le registre des signatures (CSV)
+    </button>
+  </div>
+
 </div>
 
-<!-- Fenêtre modale de confirmation -->
-<div id="modal-confirm" class="modal-overlay hidden">
+<!-- Modale 1 : Signature -->
+<div id="modal-sign" class="modal-overlay hidden">
   <div class="modal-dialog">
     <div class="modal-header">
       <h2>Confirmer votre soutien</h2>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeSignModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="modal-notice">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563eb" stroke-width="2">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563eb" stroke-width="2" style="flex-shrink:0;">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="16" x2="12" y2="12"></line>
           <line x1="12" y1="8" x2="12.01" y2="8"></line>
         </svg>
         <div>
-          <strong>Émargement officiel nominatif</strong>
-          <p>En confirmant, vous apposez votre signature nominative sur cette pétition. Cette signature est irrévocable et rattachée à votre compte professionnel.</p>
+          <strong>Émargement officiel certifié</strong>
+          <p>En validant, votre nom et courriel officiels issus de votre session de connexion seront automatiquement et infalsifiablement apposés sur la pétition.</p>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="input-comment">Observation ou commentaire (facultatif) :</label>
-        <textarea id="input-comment" rows="3" placeholder="Indiquez ici une remarque, un témoignage ou un motif particulier de soutien..."></textarea>
+        <label for="input-comment">Observation ou commentaire éventuel (facultatif) :</label>
+        <textarea id="input-comment" rows="3" placeholder="Indiquez ici une remarque, un témoignage ou un motif de soutien..."></textarea>
       </div>
 
-      <div id="modal-error" class="modal-error hidden"></div>
+      <div class="form-group">
+        <label class="checkbox-control">
+          <input type="checkbox" id="input-public">
+          <span class="checkbox-text">
+            <strong>Rendre mon soutien public sur le mur</strong><br>
+            J autorise l affichage de mon nom et de mon commentaire sur le mur des soutiens visible des autres collègues connectés (votre adresse de courriel reste toujours strictement masquée).
+          </span>
+        </label>
+      </div>
+
+      <div id="modal-sign-error" class="modal-error hidden"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal()" id="btn-cancel">Annuler</button>
-      <button class="btn-primary" onclick="submitSignature()" id="btn-confirm">
-        Confirmer mon soutien
+      <button class="btn-secondary" onclick="closeSignModal()" id="btn-sign-cancel">Annuler</button>
+      <button class="btn-primary" onclick="submitSignature()" id="btn-sign-confirm">
+        Confirmer mon émargement
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale 2 : Modification -->
+<div id="modal-edit" class="modal-overlay hidden">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h2>Modifier mon observation</h2>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="input-edit-comment">Observation ou commentaire (facultatif) :</label>
+        <textarea id="input-edit-comment" rows="3" placeholder="Indiquez ici votre remarque mise à jour..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-control">
+          <input type="checkbox" id="input-edit-public">
+          <span class="checkbox-text">
+            <strong>Rendre mon soutien public sur le mur</strong><br>
+            J autorise l affichage de mon nom et de mon commentaire sur le mur des soutiens visible des collègues connectés (votre courriel reste strictement masqué).
+          </span>
+        </label>
+      </div>
+
+      <div id="modal-edit-error" class="modal-error hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeEditModal()" id="btn-edit-cancel">Annuler</button>
+      <button class="btn-primary" onclick="submitEditSignature()" id="btn-edit-confirm">
+        Enregistrer les modifications
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale 3 : Retrait de signature -->
+<div id="modal-retract" class="modal-overlay hidden">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h2>Retirer mon soutien</h2>
+      <button class="modal-close" onclick="closeRetractModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-warning">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#dc2626" stroke-width="2" style="flex-shrink:0;">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <div>
+          <strong>Confirmation du retrait</strong>
+          <p>Êtes-vous certain de vouloir annuler votre signature ? Votre émargement sera intégralement supprimé du registre et le compteur de soutiens sera décrémenté.</p>
+        </div>
+      </div>
+      <div id="modal-retract-error" class="modal-error hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeRetractModal()" id="btn-retract-cancel">Conserver mon soutien</button>
+      <button class="btn-danger" onclick="confirmRetractSignature()" id="btn-retract-confirm">
+        Confirmer le retrait
       </button>
     </div>
   </div>
@@ -522,7 +961,9 @@ h1 {
 
 <script>
 let mySignature = null;
-let currentCount = 0;
+let petitionGoal = 100;
+let isCampaignOpen = true;
+let allSignaturesCache = [];
 
 function formatDateTime(ts) {
   if (!ts) return "";
@@ -536,65 +977,59 @@ function formatDateTime(ts) {
   });
 }
 
-function updateProgress(count) {
-  currentCount = count || 0;
-  document.getElementById("count-number").innerText = currentCount;
-  const percentage = Math.min(100, Math.max(15, Math.log10(currentCount + 1) * 45));
-  document.getElementById("progress-fill").style.width = percentage + "%";
-}
-
-function openModal() {
-  document.getElementById("modal-error").classList.add("hidden");
-  document.getElementById("modal-error").innerText = "";
-  document.getElementById("input-comment").value = "";
-  document.getElementById("modal-confirm").classList.remove("hidden");
-}
-
-function closeModal() {
-  document.getElementById("modal-confirm").classList.add("hidden");
-}
-
-async function submitSignature() {
-  const btn = document.getElementById("btn-confirm");
-  const cancelBtn = document.getElementById("btn-cancel");
-  const errDiv = document.getElementById("modal-error");
-  const comment = document.getElementById("input-comment").value.trim();
-
-  btn.disabled = true;
-  cancelBtn.disabled = true;
-  btn.innerText = "Enregistrement...";
-  errDiv.classList.add("hidden");
-
-  try {
-    await grist.docApi.applyUserActions([
-      ['AddRecord', 'Signatures', null, {
-        engagement: true,
-        commentaire: comment
-      }]
-    ]);
-    closeModal();
-    await init();
-  } catch (err) {
-    console.error("Erreur signature:", err);
-    errDiv.innerText = "Impossible d'enregistrer la signature. Vous avez peut-être déjà signé cette pétition.";
-    errDiv.classList.remove("hidden");
-    btn.disabled = false;
-    cancelBtn.disabled = false;
-    btn.innerText = "Confirmer mon soutien";
+function getInitials(name) {
+  if (!name) return "P";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
   }
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function updateProgress(count) {
+  const c = count || 0;
+  document.getElementById("count-number").innerText = c;
+  document.getElementById("progress-goal-text").innerText = "Objectif : " + petitionGoal + " soutiens";
+  const target = Math.max(1, petitionGoal);
+  const pct = Math.min(100, Math.round((c / target) * 100));
+  document.getElementById("progress-percent-text").innerText = pct + " % atteint";
+  const fillWidth = Math.max(4, Math.min(100, pct));
+  document.getElementById("progress-fill").style.width = fillWidth + "%";
 }
 
 async function loadPetitionData() {
   try {
-    const tableData = await grist.docApi.fetchTable('Texte_Petition');
+    const tableData = await grist.docApi.fetchTable("Texte_Petition");
     const ids = tableData.id || [];
     if (ids.length > 0) {
       const idx = 0;
       const titre = tableData.Titre ? tableData.Titre[idx] : "";
       const argumentaire = tableData.Argumentaire ? tableData.Argumentaire[idx] : "";
       const count = tableData.Nombre_Signatures ? tableData.Nombre_Signatures[idx] : 0;
+      if (tableData.Objectif_Signatures) {
+        if (tableData.Objectif_Signatures[idx]) {
+          petitionGoal = tableData.Objectif_Signatures[idx];
+        }
+      }
+      if (tableData.Campagne_Ouverte) {
+        isCampaignOpen = (tableData.Campagne_Ouverte[idx] === true || tableData.Campagne_Ouverte[idx] === 1);
+      } else {
+        isCampaignOpen = true;
+      }
+
       if (titre) document.getElementById("petition-titre").innerText = titre;
       if (argumentaire) document.getElementById("petition-argumentaire").innerText = argumentaire;
+
+      const badge = document.getElementById("campaign-badge");
+      const statusText = document.getElementById("campaign-status-text");
+      if (isCampaignOpen) {
+        badge.className = "status-badge open";
+        statusText.innerText = "Mobilisation en cours";
+      } else {
+        badge.className = "status-badge closed";
+        statusText.innerText = "Campagne close";
+      }
+
       updateProgress(count);
     }
   } catch (err) {
@@ -604,29 +1039,61 @@ async function loadPetitionData() {
 
 async function checkSignatureStatus() {
   try {
-    const sigTable = await grist.docApi.fetchTable('Signatures');
+    const sigTable = await grist.docApi.fetchTable("Signatures");
     const ids = sigTable.id || [];
     const validSignatures = [];
     for (let i = 0; i < ids.length; i++) {
       const isEngaged = sigTable.engagement ? (sigTable.engagement[i] === true || sigTable.engagement[i] === 1) : false;
       if (isEngaged) {
+        const isPub = sigTable.rendre_public ? (sigTable.rendre_public[i] === true || sigTable.rendre_public[i] === 1) : false;
         validSignatures.push({
           id: ids[i],
           date: sigTable.date_signature ? sigTable.date_signature[i] : null,
           commentaire: sigTable.commentaire ? sigTable.commentaire[i] : "",
           nom: sigTable.nom_signataire ? sigTable.nom_signataire[i] : "",
-          courriel: sigTable.courriel_signataire ? sigTable.courriel_signataire[i] : ""
+          courriel: sigTable.courriel_signataire ? sigTable.courriel_signataire[i] : "",
+          rendre_public: isPub
         });
       }
     }
 
-    if (validSignatures.length > 0) {
-      mySignature = validSignatures[validSignatures.length - 1];
+    allSignaturesCache = validSignatures;
+
+    const savedRowId = localStorage.getItem("grist_petition_row_id");
+    let matchedSig = null;
+
+    if (savedRowId) {
+      const numId = parseInt(savedRowId, 10);
+      for (let j = 0; j < validSignatures.length; j++) {
+        if (validSignatures[j].id === numId) {
+          matchedSig = validSignatures[j];
+          break;
+        }
+      }
+    }
+
+    if (!matchedSig) {
+      for (let k = 0; k < validSignatures.length; k++) {
+        if (validSignatures[k].courriel) {
+          if (validSignatures[k].courriel.trim().length > 0) {
+            matchedSig = validSignatures[k];
+            localStorage.setItem("grist_petition_row_id", matchedSig.id);
+            break;
+          }
+        }
+      }
+    }
+
+    if (matchedSig) {
+      mySignature = matchedSig;
       displaySignedState();
     } else {
       mySignature = null;
       displayUnsignedState();
     }
+
+    renderSupportersWall(validSignatures);
+
   } catch (err) {
     console.warn("Vérification statut:", err);
     displayUnsignedState();
@@ -634,24 +1101,46 @@ async function checkSignatureStatus() {
 }
 
 function displaySignedState() {
-  document.getElementById("state-unsigned").classList.add("hidden");
+  document.getElementById("state-unsigned-open").classList.add("hidden");
+  document.getElementById("state-unsigned-closed").classList.add("hidden");
   const stateSigned = document.getElementById("state-signed");
   stateSigned.classList.remove("hidden");
 
+  const nameEl = document.getElementById("signed-signatory-name");
+  if (mySignature) {
+    if (mySignature.nom) {
+      nameEl.innerText = "Émargement certifié : " + mySignature.nom;
+      nameEl.classList.remove("hidden");
+    } else {
+      nameEl.classList.add("hidden");
+    }
+  }
+
+  const metaEl = document.getElementById("signed-meta");
   if (mySignature) {
     if (mySignature.date) {
-      document.getElementById("signed-meta").innerText = "Enregistré le " + formatDateTime(mySignature.date);
+      metaEl.innerText = "Enregistré le " + formatDateTime(mySignature.date);
     } else {
-      document.getElementById("signed-meta").innerText = "Soutien enregistré et certifié";
+      metaEl.innerText = "Soutien enregistré et certifié";
     }
-  } else {
-    document.getElementById("signed-meta").innerText = "Soutien enregistré et certifié";
+  }
+
+  const visBadge = document.getElementById("signed-visibility-badge");
+  if (mySignature) {
+    if (mySignature.rendre_public) {
+      visBadge.className = "visibility-tag public";
+      visBadge.innerText = "Visible sur le mur public des soutiens";
+    } else {
+      visBadge.className = "visibility-tag private";
+      visBadge.innerText = "Confidentiel (visible uniquement du gestionnaire)";
+    }
   }
 
   const commentBox = document.getElementById("signed-comment-box");
+  const commentText = document.getElementById("signed-comment-text");
   if (mySignature) {
     if (mySignature.commentaire) {
-      document.getElementById("signed-comment-text").innerText = '"' + mySignature.commentaire + '"';
+      commentText.innerText = '"' + mySignature.commentaire + '"';
       commentBox.classList.remove("hidden");
     } else {
       commentBox.classList.add("hidden");
@@ -663,10 +1152,246 @@ function displaySignedState() {
 
 function displayUnsignedState() {
   document.getElementById("state-signed").classList.add("hidden");
-  document.getElementById("state-unsigned").classList.remove("hidden");
+  if (isCampaignOpen) {
+    document.getElementById("state-unsigned-open").classList.remove("hidden");
+    document.getElementById("state-unsigned-closed").classList.add("hidden");
+  } else {
+    document.getElementById("state-unsigned-open").classList.add("hidden");
+    document.getElementById("state-unsigned-closed").classList.remove("hidden");
+  }
 }
 
-grist.ready({ requiredAccess: 'full' });
+function renderSupportersWall(signatures) {
+  const publicList = [];
+  for (let i = 0; i < signatures.length; i++) {
+    if (signatures[i].rendre_public) {
+      publicList.push(signatures[i]);
+    }
+  }
+
+  const wallTitle = document.getElementById("wall-title-text");
+  wallTitle.innerText = "Mur des soutiens publics (" + publicList.length + ")";
+
+  const container = document.getElementById("wall-grid-container");
+  const emptyMsg = document.getElementById("wall-empty-message");
+  container.innerHTML = "";
+
+  if (publicList.length === 0) {
+    emptyMsg.classList.remove("hidden");
+  } else {
+    emptyMsg.classList.add("hidden");
+    for (let j = 0; j < publicList.length; j++) {
+      const item = publicList[j];
+      const card = document.createElement("div");
+      card.className = "supporter-item";
+
+      const head = document.createElement("div");
+      head.className = "supporter-head";
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar-circle";
+      avatar.innerText = getInitials(item.nom);
+
+      const info = document.createElement("div");
+      info.className = "supporter-info";
+
+      const nameSpan = document.createElement("div");
+      nameSpan.className = "supporter-name";
+      nameSpan.innerText = item.nom ? item.nom : "Collègue signataire";
+
+      const dateSpan = document.createElement("div");
+      dateSpan.className = "supporter-date";
+      dateSpan.innerText = formatDateTime(item.date);
+
+      info.appendChild(nameSpan);
+      info.appendChild(dateSpan);
+      head.appendChild(avatar);
+      head.appendChild(info);
+      card.appendChild(head);
+
+      if (item.commentaire) {
+        const comm = document.createElement("div");
+        comm.className = "supporter-comment";
+        comm.innerText = '"' + item.commentaire + '"';
+        card.appendChild(comm);
+      }
+
+      container.appendChild(card);
+    }
+  }
+}
+
+/* Modale Signature */
+function openSignModal() {
+  document.getElementById("modal-sign-error").classList.add("hidden");
+  document.getElementById("modal-sign-error").innerText = "";
+  document.getElementById("input-comment").value = "";
+  document.getElementById("input-public").checked = false;
+  document.getElementById("modal-sign").classList.remove("hidden");
+}
+
+function closeSignModal() {
+  document.getElementById("modal-sign").classList.add("hidden");
+}
+
+async function submitSignature() {
+  const btn = document.getElementById("btn-sign-confirm");
+  const cancelBtn = document.getElementById("btn-sign-cancel");
+  const errDiv = document.getElementById("modal-sign-error");
+  const comment = document.getElementById("input-comment").value.trim();
+  const isPublic = document.getElementById("input-public").checked;
+
+  btn.disabled = true;
+  cancelBtn.disabled = true;
+  btn.innerText = "Enregistrement...";
+  errDiv.classList.add("hidden");
+
+  try {
+    const res = await grist.docApi.applyUserActions([
+      ["AddRecord", "Signatures", null, {
+        engagement: true,
+        commentaire: comment,
+        rendre_public: isPublic
+      }]
+    ]);
+    if (res) {
+      if (Array.isArray(res)) {
+        if (res.length > 0) {
+          localStorage.setItem("grist_petition_row_id", res[0]);
+        }
+      }
+    }
+    closeSignModal();
+    await init();
+  } catch (err) {
+    console.error("Erreur signature:", err);
+    errDiv.innerText = "Impossible d enregistrer la signature. Vous avez peut-être déjà signé cette démarche.";
+    errDiv.classList.remove("hidden");
+    btn.disabled = false;
+    cancelBtn.disabled = false;
+    btn.innerText = "Confirmer mon émargement";
+  }
+}
+
+/* Modale Modification */
+function openEditModal() {
+  if (!mySignature) return;
+  document.getElementById("modal-edit-error").classList.add("hidden");
+  document.getElementById("input-edit-comment").value = mySignature.commentaire || "";
+  document.getElementById("input-edit-public").checked = mySignature.rendre_public ? true : false;
+  document.getElementById("modal-edit").classList.remove("hidden");
+}
+
+function closeEditModal() {
+  document.getElementById("modal-edit").classList.add("hidden");
+}
+
+async function submitEditSignature() {
+  if (!mySignature) return;
+  const btn = document.getElementById("btn-edit-confirm");
+  const cancelBtn = document.getElementById("btn-edit-cancel");
+  const errDiv = document.getElementById("modal-edit-error");
+  const comment = document.getElementById("input-edit-comment").value.trim();
+  const isPublic = document.getElementById("input-edit-public").checked;
+
+  btn.disabled = true;
+  cancelBtn.disabled = true;
+  btn.innerText = "Mise à jour...";
+  errDiv.classList.add("hidden");
+
+  try {
+    await grist.docApi.applyUserActions([
+      ["UpdateRecord", "Signatures", mySignature.id, {
+        commentaire: comment,
+        rendre_public: isPublic
+      }]
+    ]);
+    closeEditModal();
+    await init();
+  } catch (err) {
+    console.error("Erreur modification:", err);
+    errDiv.innerText = "Erreur lors de la modification de votre observation.";
+    errDiv.classList.remove("hidden");
+    btn.disabled = false;
+    cancelBtn.disabled = false;
+    btn.innerText = "Enregistrer les modifications";
+  }
+}
+
+/* Modale Retrait */
+function openRetractModal() {
+  if (!mySignature) return;
+  document.getElementById("modal-retract-error").classList.add("hidden");
+  document.getElementById("modal-retract").classList.remove("hidden");
+}
+
+function closeRetractModal() {
+  document.getElementById("modal-retract").classList.add("hidden");
+}
+
+async function confirmRetractSignature() {
+  if (!mySignature) return;
+  const btn = document.getElementById("btn-retract-confirm");
+  const cancelBtn = document.getElementById("btn-retract-cancel");
+  const errDiv = document.getElementById("modal-retract-error");
+
+  btn.disabled = true;
+  cancelBtn.disabled = true;
+  btn.innerText = "Retrait en cours...";
+  errDiv.classList.add("hidden");
+
+  try {
+    await grist.docApi.applyUserActions([
+      ["RemoveRecord", "Signatures", mySignature.id]
+    ]);
+    localStorage.removeItem("grist_petition_row_id");
+    mySignature = null;
+    closeRetractModal();
+    await init();
+  } catch (err) {
+    console.error("Erreur retrait:", err);
+    errDiv.innerText = "Erreur lors du retrait de votre émargement.";
+    errDiv.classList.remove("hidden");
+    btn.disabled = false;
+    cancelBtn.disabled = false;
+    btn.innerText = "Confirmer le retrait";
+  }
+}
+
+/* Export CSV */
+function exportRegistryCSV() {
+  if (allSignaturesCache.length === 0) {
+    alert("Aucune signature enregistrée à exporter pour l instant.");
+    return;
+  }
+
+  const headers = ["Nom du signataire", "Courriel du signataire", "Date et heure", "Observation ou commentaire", "Visibilité publique"];
+  const rows = [headers.join(";")];
+
+  for (let i = 0; i < allSignaturesCache.length; i++) {
+    const s = allSignaturesCache[i];
+    const nom = (s.nom || "").replace(/"/g, '""');
+    const courriel = (s.courriel || "").replace(/"/g, '""');
+    const dateStr = formatDateTime(s.date);
+    const comm = (s.commentaire || "").replace(/"/g, '""');
+    const vis = s.rendre_public ? "Public" : "Confidentiel";
+    rows.push(['"' + nom + '"', '"' + courriel + '"', '"' + dateStr + '"', '"' + comm + '"', '"' + vis + '"'].join(";"));
+  }
+
+  const csvContent = "﻿" + rows.join("
+");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "registre_signatures_petition.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+grist.ready({ requiredAccess: "full" });
 
 async function init() {
   await loadPetitionData();
