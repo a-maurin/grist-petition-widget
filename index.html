@@ -613,6 +613,60 @@ body {
   margin-bottom: 0;
 }
 
+/* Mode feuille d'émargement compacte dans la popup ProConnect */
+body.popup-flow {
+  background-color: #ffffff;
+  padding: 16px 14px;
+}
+
+body.popup-flow .petition-card,
+body.popup-flow .stat-card,
+body.popup-flow .wall-card,
+body.popup-flow .rgpd-footer-card,
+body.popup-flow #auth-help-line {
+  display: none !important;
+}
+
+body.popup-flow .action-card {
+  box-shadow: none;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 0;
+  padding: 24px 20px;
+}
+
+.popup-sheet-header {
+  display: none;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.popup-flow .popup-sheet-header {
+  display: block;
+}
+
+/* Bandeau de notification (toast) sur l'onglet principal */
+.toast-banner {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
+  animation: modal-appear 0.25s ease-out;
+}
+
+.toast-banner.retract {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
 /* Bas de page et espace organisateur */
 .admin-footer {
   display: flex;
@@ -802,6 +856,19 @@ body {
 <body>
 
 <div class="petition-container">
+
+  <!-- Bandeau de notification dynamique -->
+  <div id="toast-notification" class="toast-banner hidden">
+    <svg id="toast-icon-check" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <svg id="toast-icon-info" class="hidden" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#dc2626" stroke-width="2.5">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span id="toast-message">Votre démarche a bien été enregistrée.</span>
+  </div>
 
   <!-- En-tête de la pétition -->
   <div class="petition-card">
@@ -1099,9 +1166,53 @@ let isCampaignOpen = true;
 let allSignaturesCache = [];
 let fullPublicList = [];
 let displayedSupportersCount = 12;
+let authPopupRef = null;
 
 const GRIST_DOC_ID = "h7dMrfKpDEApR4qtufvo4i";
 const GRIST_BASE_URL = "https://grist.numerique.gouv.fr";
+
+/* Canal de diffusion inter-fenêtres (même origine) */
+let bc = null;
+try {
+  bc = new BroadcastChannel("petition_proconnect_channel");
+} catch (e) {}
+
+function broadcastEvent(data) {
+  if (bc) {
+    try { bc.postMessage(data); } catch (e) {}
+  }
+  try {
+    localStorage.setItem("petition_proconnect_event", JSON.stringify({ ...data, ts: Date.now() }));
+  } catch (e) {}
+}
+
+function isPopupContext() {
+  return Boolean(localStorage.getItem("grist_popup_active") === "1" && window.self !== window.top);
+}
+
+/* Gestion de l'affichage du bandeau toast */
+function showToast(message, isError) {
+  const toast = document.getElementById("toast-notification");
+  const text = document.getElementById("toast-message");
+  const iconCheck = document.getElementById("toast-icon-check");
+  const iconInfo = document.getElementById("toast-icon-info");
+  if (!toast || !text) return;
+
+  text.innerText = message;
+  if (isError) {
+    toast.className = "toast-banner retract";
+    if (iconCheck) iconCheck.classList.add("hidden");
+    if (iconInfo) iconInfo.classList.remove("hidden");
+  } else {
+    toast.className = "toast-banner";
+    if (iconCheck) iconCheck.classList.remove("hidden");
+    if (iconInfo) iconInfo.classList.add("hidden");
+  }
+  toast.classList.remove("hidden");
+  setTimeout(function() {
+    toast.classList.add("hidden");
+  }, 6000);
+}
 
 function formatDateTime(ts) {
   if (!ts) return "";
@@ -1217,7 +1328,6 @@ async function loadPetitionData() {
         }
       }
     } else {
-      /* Mode autonome sur GitHub Pages : appel API REST public Grist */
       const url = `${GRIST_BASE_URL}/api/docs/${GRIST_DOC_ID}/tables/Texte_Petition/records`;
       const resp = await fetch(url);
       if (resp.ok) {
@@ -1234,7 +1344,11 @@ async function loadPetitionData() {
       }
     }
 
-    if (titre) document.getElementById("petition-titre").innerText = titre;
+    if (titre) {
+      document.getElementById("petition-titre").innerText = titre;
+      const popupTitleEl = document.getElementById("popup-petition-title");
+      if (popupTitleEl) popupTitleEl.innerText = titre;
+    }
     if (argumentaire) document.getElementById("petition-argumentaire").innerHTML = renderMarkdown(argumentaire);
     if (rgpd) {
       document.getElementById("petition-rgpd-text").innerHTML = renderMarkdown(rgpd);
@@ -1262,7 +1376,6 @@ async function loadPetitionData() {
 async function detectUserSession() {
   if (currentUser) return currentUser;
 
-  /* 1. Essai session locale (transmise par popup ProConnect) */
   try {
     const stored = sessionStorage.getItem("grist_proconnect_user");
     if (stored) {
@@ -1271,7 +1384,6 @@ async function detectUserSession() {
     }
   } catch (e) {}
 
-  /* 2. Essai point de terminaison Grist */
   try {
     const url = isGristEnvironment ? "/api/session/access/active" : `${GRIST_BASE_URL}/api/session/access/active`;
     const resp = await fetch(url, { credentials: "same-origin" });
@@ -1298,6 +1410,10 @@ async function checkSignatureStatus() {
   try {
     await detectUserSession();
 
+    if (isPopupContext()) {
+      document.body.classList.add("popup-flow");
+    }
+
     let validSignatures = [];
 
     if (isGristEnvironment && window.grist && grist.docApi) {
@@ -1318,7 +1434,6 @@ async function checkSignatureStatus() {
         }
       }
     } else {
-      /* Mode autonome public REST */
       const url = `${GRIST_BASE_URL}/api/docs/${GRIST_DOC_ID}/tables/Signatures/records`;
       const resp = await fetch(url);
       if (resp.ok) {
@@ -1353,6 +1468,13 @@ async function checkSignatureStatus() {
       }
     }
 
+    if (!matchedSig && !isGristEnvironment) {
+      try {
+        const cachedSig = sessionStorage.getItem("grist_my_signature");
+        if (cachedSig) matchedSig = JSON.parse(cachedSig);
+      } catch (e) {}
+    }
+
     if (matchedSig) {
       mySignature = matchedSig;
       displaySignedState();
@@ -1367,7 +1489,7 @@ async function checkSignatureStatus() {
     /* Affichage de la barre d'administration si gestionnaire */
     const adminBar = document.getElementById("admin-footer-bar");
     if (adminBar) {
-      if (currentUser && currentUser.isOwner) {
+      if (currentUser && currentUser.isOwner && !isPopupContext()) {
         adminBar.classList.remove("hidden");
       } else {
         adminBar.classList.add("hidden");
@@ -1376,9 +1498,8 @@ async function checkSignatureStatus() {
 
     renderSupportersWall(validSignatures);
 
-    /* En mode popup ProConnect : si l'utilisateur est authentifié et n'a pas encore signé, ouvrir directement la modale */
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("popup") === "1" && currentUser && !mySignature && isCampaignOpen) {
+    /* En mode popup épurée : si l'agent est connecté et non signé, ouvrir directement la modale de signature */
+    if (isPopupContext() && currentUser && !mySignature && isCampaignOpen) {
       openSignModal();
     }
 
@@ -1464,13 +1585,24 @@ function displaySignedState() {
 }
 
 function handleProConnectAuth() {
-  const nextTarget = "/o/docs/" + GRIST_DOC_ID + "/p/1?style=singlePage&popup=1";
+  localStorage.setItem("grist_popup_active", "1");
+  const nextTarget = "/o/docs/" + GRIST_DOC_ID + "/p/1?style=singlePage";
   const signinUrl = `${GRIST_BASE_URL}/signin?next=` + encodeURIComponent(nextTarget);
-  const w = 680;
-  const h = 760;
+  const w = 620;
+  const h = 700;
   const left = Math.max(0, (window.screen.width - w) / 2);
   const top = Math.max(0, (window.screen.height - h) / 2);
-  window.open(signinUrl, "proconnect_flow", `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+  authPopupRef = window.open(signinUrl, "proconnect_flow", `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+
+  if (authPopupRef) {
+    const pollTimer = setInterval(function() {
+      if (!authPopupRef || authPopupRef.closed) {
+        clearInterval(pollTimer);
+        localStorage.removeItem("grist_popup_active");
+        init();
+      }
+    }, 700);
+  }
 }
 
 function renderSupportersWall(signatures) {
@@ -1481,7 +1613,6 @@ function renderSupportersWall(signatures) {
     }
   }
 
-  /* Tri antéchronologique */
   publicList.sort(function(a, b) {
     const da = a.date ? (typeof a.date === "number" ? a.date : new Date(a.date).getTime() / 1000) : 0;
     const db = b.date ? (typeof b.date === "number" ? b.date : new Date(b.date).getTime() / 1000) : 0;
@@ -1561,7 +1692,7 @@ function showMoreSupporters() {
 
 /* Modale Signature */
 function openSignModal() {
-  if (!currentUser) {
+  if (!currentUser && !isGristEnvironment) {
     handleProConnectAuth();
     return;
   }
@@ -1603,17 +1734,46 @@ async function submitSignature() {
       return;
     }
 
-    /* Notification de la fenêtre mère si popup */
-    if (window.opener || (window.top && window.top.opener)) {
-      const op = window.opener || window.top.opener;
-      op.postMessage({ type: "PETITION_UPDATED", user: currentUser }, "*");
-      setTimeout(function() {
-        if (window.top && window.top.close) window.top.close();
-        else window.close();
-      }, 1000);
-    }
+    /* Notification instantanée de l'onglet principal */
+    broadcastEvent({
+      type: "ACTION_SUCCESS",
+      action: "sign",
+      user: currentUser,
+      signature: {
+        nom: currentUser ? currentUser.name : "",
+        courriel: currentUser ? currentUser.email : "",
+        date: Math.floor(Date.now() / 1000),
+        commentaire: comment,
+        rendre_public: isPublic
+      }
+    });
 
     closeSignModal();
+
+    if (isPopupContext()) {
+      document.getElementById("action-zone").innerHTML = `
+        <div class="badge-confirmed" style="text-align: center; justify-content: center; padding: 30px 16px;">
+          <div class="icon-success">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#16a34a" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div class="confirmed-text">
+            <h3>Émargement validé avec succès !</h3>
+            <p>Fermeture automatique de cette fenêtre...</p>
+          </div>
+        </div>
+      `;
+      setTimeout(function() {
+        localStorage.removeItem("grist_popup_active");
+        if (window.top && window.top !== window && window.top.close) {
+          try { window.top.close(); } catch (e) {}
+        }
+        window.close();
+      }, 700);
+      return;
+    }
+
     await init();
   } catch (err) {
     console.error("Erreur signature:", err);
@@ -1629,10 +1789,13 @@ async function submitSignature() {
 
 /* Modale Modification */
 function openEditModal() {
-  if (!mySignature) return;
+  if (!mySignature && !isGristEnvironment) {
+    handleProConnectAuth();
+    return;
+  }
   document.getElementById("modal-edit-error").classList.add("hidden");
-  document.getElementById("input-edit-comment").value = mySignature.commentaire || "";
-  document.getElementById("input-edit-public").checked = mySignature.rendre_public ? true : false;
+  document.getElementById("input-edit-comment").value = mySignature ? (mySignature.commentaire || "") : "";
+  document.getElementById("input-edit-public").checked = mySignature ? (mySignature.rendre_public ? true : false) : false;
   document.getElementById("modal-edit").classList.remove("hidden");
 }
 
@@ -1641,7 +1804,6 @@ function closeEditModal() {
 }
 
 async function submitEditSignature() {
-  if (!mySignature) return;
   const btn = document.getElementById("btn-edit-confirm");
   const cancelBtn = document.getElementById("btn-edit-cancel");
   const errDiv = document.getElementById("modal-edit-error");
@@ -1654,7 +1816,7 @@ async function submitEditSignature() {
   errDiv.classList.add("hidden");
 
   try {
-    if (isGristEnvironment && window.grist && grist.docApi) {
+    if (isGristEnvironment && window.grist && grist.docApi && mySignature) {
       await grist.docApi.applyUserActions([
         ["UpdateRecord", "Signatures", mySignature.id, {
           commentaire: comment,
@@ -1667,16 +1829,43 @@ async function submitEditSignature() {
       return;
     }
 
-    if (window.opener || (window.top && window.top.opener)) {
-      const op = window.opener || window.top.opener;
-      op.postMessage({ type: "PETITION_UPDATED", user: currentUser }, "*");
-      setTimeout(function() {
-        if (window.top && window.top.close) window.top.close();
-        else window.close();
-      }, 1000);
-    }
+    broadcastEvent({
+      type: "ACTION_SUCCESS",
+      action: "edit",
+      user: currentUser,
+      signature: {
+        ...(mySignature || {}),
+        commentaire: comment,
+        rendre_public: isPublic
+      }
+    });
 
     closeEditModal();
+
+    if (isPopupContext()) {
+      document.getElementById("action-zone").innerHTML = `
+        <div class="badge-confirmed" style="text-align: center; justify-content: center; padding: 30px 16px;">
+          <div class="icon-success">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#16a34a" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div class="confirmed-text">
+            <h3>Observation mise à jour !</h3>
+            <p>Fermeture automatique de cette fenêtre...</p>
+          </div>
+        </div>
+      `;
+      setTimeout(function() {
+        localStorage.removeItem("grist_popup_active");
+        if (window.top && window.top !== window && window.top.close) {
+          try { window.top.close(); } catch (e) {}
+        }
+        window.close();
+      }, 700);
+      return;
+    }
+
     await init();
   } catch (err) {
     console.error("Erreur modification:", err);
@@ -1690,7 +1879,10 @@ async function submitEditSignature() {
 
 /* Modale Retrait */
 function openRetractModal() {
-  if (!mySignature) return;
+  if (!mySignature && !isGristEnvironment) {
+    handleProConnectAuth();
+    return;
+  }
   document.getElementById("modal-retract-error").classList.add("hidden");
   document.getElementById("modal-retract").classList.remove("hidden");
 }
@@ -1700,7 +1892,6 @@ function closeRetractModal() {
 }
 
 async function confirmRetractSignature() {
-  if (!mySignature) return;
   const btn = document.getElementById("btn-retract-confirm");
   const cancelBtn = document.getElementById("btn-retract-cancel");
   const errDiv = document.getElementById("modal-retract-error");
@@ -1711,7 +1902,7 @@ async function confirmRetractSignature() {
   errDiv.classList.add("hidden");
 
   try {
-    if (isGristEnvironment && window.grist && grist.docApi) {
+    if (isGristEnvironment && window.grist && grist.docApi && mySignature) {
       await grist.docApi.applyUserActions([
         ["RemoveRecord", "Signatures", mySignature.id]
       ]);
@@ -1724,16 +1915,39 @@ async function confirmRetractSignature() {
     mySignature = null;
     try { sessionStorage.removeItem("grist_my_signature"); } catch (e) {}
 
-    if (window.opener || (window.top && window.top.opener)) {
-      const op = window.opener || window.top.opener;
-      op.postMessage({ type: "PETITION_UPDATED", user: currentUser }, "*");
-      setTimeout(function() {
-        if (window.top && window.top.close) window.top.close();
-        else window.close();
-      }, 1000);
-    }
+    broadcastEvent({
+      type: "ACTION_SUCCESS",
+      action: "retract",
+      user: currentUser
+    });
 
     closeRetractModal();
+
+    if (isPopupContext()) {
+      document.getElementById("action-zone").innerHTML = `
+        <div class="badge-confirmed" style="text-align: center; justify-content: center; padding: 30px 16px;">
+          <div class="icon-success">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#dc2626" stroke-width="2.5">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </div>
+          <div class="confirmed-text">
+            <h3 style="color: #b91c1c;">Votre soutien a été retiré</h3>
+            <p>Fermeture automatique de cette fenêtre...</p>
+          </div>
+        </div>
+      `;
+      setTimeout(function() {
+        localStorage.removeItem("grist_popup_active");
+        if (window.top && window.top !== window && window.top.close) {
+          try { window.top.close(); } catch (e) {}
+        }
+        window.close();
+      }, 700);
+      return;
+    }
+
     await init();
   } catch (err) {
     console.error("Erreur retrait:", err);
@@ -1778,29 +1992,71 @@ function exportRegistryCSV() {
   URL.revokeObjectURL(url);
 }
 
-/* Initialisation et écouteurs d'événements */
+/* Réception des événements de synchronisation */
+function handleIncomingAction(data) {
+  if (!data || data.type !== "ACTION_SUCCESS") return;
+
+  if (authPopupRef && !authPopupRef.closed) {
+    try { authPopupRef.close(); } catch (e) {}
+    authPopupRef = null;
+  }
+  localStorage.removeItem("grist_popup_active");
+
+  if (data.user) {
+    currentUser = data.user;
+    try { sessionStorage.setItem("grist_proconnect_user", JSON.stringify(currentUser)); } catch (e) {}
+  }
+
+  if (data.action === "sign") {
+    if (data.signature) {
+      mySignature = data.signature;
+      try { sessionStorage.setItem("grist_my_signature", JSON.stringify(mySignature)); } catch (e) {}
+    }
+    showToast("Votre émargement a bien été certifié et enregistré avec succès.");
+  } else if (data.action === "retract") {
+    mySignature = null;
+    try { sessionStorage.removeItem("grist_my_signature"); } catch (e) {}
+    showToast("Votre soutien a bien été retiré du registre.", true);
+  } else if (data.action === "edit") {
+    if (data.signature) {
+      mySignature = data.signature;
+      try { sessionStorage.setItem("grist_my_signature", JSON.stringify(mySignature)); } catch (e) {}
+    }
+    showToast("Votre observation a bien été mise à jour avec succès.");
+  }
+
+  init();
+}
+
+if (bc) {
+  bc.onmessage = function(ev) {
+    handleIncomingAction(ev.data);
+  };
+}
+
+window.addEventListener("storage", function(ev) {
+  if (ev.key === "petition_proconnect_event" && ev.newValue) {
+    try {
+      const payload = JSON.parse(ev.newValue);
+      handleIncomingAction(payload);
+    } catch (e) {}
+  }
+});
+
+/* Actualisation lors du retour sur l'onglet principal */
+window.addEventListener("focus", function() {
+  if (localStorage.getItem("grist_popup_active") === "1" && authPopupRef && authPopupRef.closed) {
+    localStorage.removeItem("grist_popup_active");
+  }
+  init();
+});
+
+/* Initialisation */
 async function init() {
   await loadPetitionData();
   await checkSignatureStatus();
 }
 
-/* Écoute des mises à jour transmises par la fenêtre popup */
-window.addEventListener("message", function(event) {
-  if (event.data && (event.data.type === "PETITION_UPDATED" || event.data.type === "GRIST_AUTH_SUCCESS")) {
-    if (event.data.user) {
-      currentUser = event.data.user;
-      try { sessionStorage.setItem("grist_proconnect_user", JSON.stringify(currentUser)); } catch (e) {}
-    }
-    init();
-  }
-});
-
-/* Actualisation lors du retour sur l'onglet */
-window.addEventListener("focus", function() {
-  init();
-});
-
-/* Raccordement à Grist si exécuté en tant que composant intégré */
 try {
   if (window.grist) {
     grist.ready({ requiredAccess: "full" });
@@ -1813,7 +2069,6 @@ try {
   isGristEnvironment = false;
 }
 
-/* Lancement initial */
 init();
 </script>
 </body>
